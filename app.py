@@ -56,15 +56,22 @@ def get_pdf_text(filepaths):
                 text += page.extract_text()
     return text
 
-def get_text_chunks(text):
-    text_splitter = CharacterTextSplitter(
-        separator="\n",
-        chunk_size=1000,
-        chunk_overlap=200,
-        length_function=len
-    )
-    chunks = text_splitter.split_text(text)
+def get_text_chunks(text, chunks_file):
+    if os.path.exists(chunks_file):
+        with open(chunks_file, 'rb') as f:
+            chunks = pickle.load(f)
+    else:
+        text_splitter = CharacterTextSplitter(
+            separator="\n",
+            chunk_size=1000,
+            chunk_overlap=200,
+            length_function=len
+        )
+        chunks = text_splitter.split_text(text)
+        with open(chunks_file, 'wb') as f:
+            pickle.dump(chunks, f)
     return chunks
+
 
 def get_vectorstore(text_chunks, vectorstore_file):
     if os.path.exists(vectorstore_file):
@@ -110,28 +117,32 @@ def handle_userinput(user_question):
         else:
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
-
+            
+            
 def main():
     load_dotenv()
     st.set_page_config(page_title="TutorIA - Chatea con tu Profe", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
-    # Obtener los archivos PDF y procesarlos
-    file_directory = 'files'
-    filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
-    text = get_pdf_text(filepaths)
+    # Comprueba si el estado de la sesión ya se ha inicializado
+    if "initialized" not in st.session_state:
+        # Obtener los archivos PDF y procesarlos
+        file_directory = 'files'
+        filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
+        text = get_pdf_text(filepaths)
 
-    # Dividir el texto en fragmentos
-    chunks = get_text_chunks(text)
+        # Dividir el texto en fragmentos
+        chunks_file = 'chunks.pkl'
+        chunks = get_text_chunks(text, chunks_file)
 
-    # Crear el vectorstore
-    vectorstore_file = 'vectorstore.pkl'
-    vectorstore = get_vectorstore(chunks, vectorstore_file)
+        # Crear el vectorstore
+        vectorstore_file = 'vectorstore.pkl'
+        vectorstore = get_vectorstore(chunks, vectorstore_file)
 
-    # Crear la cadena de conversación
-    conversation = get_conversation_chain(vectorstore)
-
-    chat_history = []
+        # Crear la cadena de conversación
+        st.session_state.conversation = get_conversation_chain(vectorstore)
+        st.session_state.chat_history = []
+        st.session_state.initialized = True
 
     st.header("TutorIA - Chatea con tu Profe :books:")
     st.write("Realizar consultas de cualquier tema en tu material de estudio: Haz preguntas como si estuvieras hablando con tu profesor real. TutorIA busca en tus PDFs y proporciona respuestas claras y concisas.")
@@ -139,16 +150,8 @@ def main():
     user_question = st.text_input("Realiza preguntas sobre la asignatura:")
     if st.button('Enviar'):  
         if user_question:
-            response = conversation({'question': user_question})
-            chat_history = response['chat_history']
+            handle_userinput(user_question)
 
-            for i, message in enumerate(chat_history):
-                if i % 2 == 0:
-                    st.write(user_template.replace(
-                        "{{MSG}}", message.content), unsafe_allow_html=True)
-                else:
-                    st.write(bot_template.replace(
-                        "{{MSG}}", message.content), unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
