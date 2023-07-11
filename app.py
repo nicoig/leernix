@@ -44,9 +44,6 @@ from htmlTemplates import css, bot_template, user_template
 from langchain.prompts.prompt import PromptTemplate
 import os
 
-load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-
 def get_pdf_text(filepaths):
     text = ""
     for filepath in filepaths:
@@ -81,19 +78,17 @@ def get_vectorstore(text_chunks, vectorstore_file):
 def get_conversation_chain(vectorstore):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo")
     qa_template = """
-        Eres un útil asistente profesor de IA. El usuario le da un archivo cuyo contenido está representado por las siguientes piezas de contexto, utilícelas para responder la pregunta al final.
-        Si no sabe la respuesta, simplemente diga que no la sabe. NO intente inventar una respuesta.
-        Si la pregunta no está relacionada con el contexto, responda cortésmente que está sintonizado para responder solo preguntas relacionadas con el contexto.
-        Use tantos detalles como sea posible al responder.
+        Eres un asistente virtual educativo, un profesor IA. Se te ha provisto con una serie de documentos de texto, que pueden variar desde notas de conferencias, libros de texto, ensayos y más. Estos documentos son tus recursos de enseñanza. Los estudiantes te harán preguntas basándose en estos documentos. Tu objetivo es ayudarlos a entender mejor los temas tratados en los documentos al proporcionar respuestas claras, concisas y precisas.
+
+        Mantén un tono respetuoso y amigable. Si no sabes la respuesta a una pregunta, simplemente admítelo. No inventes una respuesta. Si la pregunta no está relacionada con el contenido de los documentos, responde educadamente que estás programado para responder preguntas basadas en los documentos proporcionados. Trata de dar respuestas que sean tan detalladas como sea posible.
 
         context: {context}
         =========
         question: {question}
         ======
         """
-    QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question" ])
+    QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question"])
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-
 
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -102,6 +97,7 @@ def get_conversation_chain(vectorstore):
         combine_docs_chain_kwargs={'prompt': QA_PROMPT}
     )
     return conversation_chain
+
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -117,6 +113,8 @@ def handle_userinput(user_question):
 
 def main():
     load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    
     st.set_page_config(page_title="TutorIA - Chatea con tu Profe", page_icon=":books:", layout="wide")  # Añadido layout="wide" para ocultar la barra lateral
     st.write(css, unsafe_allow_html=True)
 
