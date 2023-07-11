@@ -30,7 +30,8 @@
 
 
 
-import streamlit as st
+import os
+import pickle
 from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
@@ -39,10 +40,11 @@ from langchain.vectorstores import FAISS
 from langchain.chat_models import ChatOpenAI
 from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationalRetrievalChain
-import pickle
 from htmlTemplates import css, bot_template, user_template
 from langchain.prompts.prompt import PromptTemplate
-import os
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
 
 def get_pdf_text(filepaths):
     text = ""
@@ -74,21 +76,19 @@ def get_vectorstore(text_chunks, vectorstore_file):
             pickle.dump(vectorstore, f)
     return vectorstore
 
-
 def get_conversation_chain(vectorstore):
     llm = ChatOpenAI(model_name="gpt-3.5-turbo")
     qa_template = """
-        Eres un asistente virtual educativo, un profesor IA. Se te ha provisto con una serie de documentos de texto, que pueden variar desde notas de conferencias, libros de texto, ensayos y más. Estos documentos son tus recursos de enseñanza. Los estudiantes te harán preguntas basándose en estos documentos. Tu objetivo es ayudarlos a entender mejor los temas tratados en los documentos al proporcionar respuestas claras, concisas y precisas.
-
-        Mantén un tono respetuoso y amigable. Si no sabes la respuesta a una pregunta, simplemente admítelo. No inventes una respuesta. Si la pregunta no está relacionada con el contenido de los documentos, responde educadamente que estás programado para responder preguntas basadas en los documentos proporcionados. Trata de dar respuestas que sean tan detalladas como sea posible.
+        Eres un asistente de IA diseñado para actuar como un profesor. Se te proporcionarán varios documentos de texto y se espera que respondas preguntas relacionadas con ellos de la manera más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con los documentos proporcionados, cortésmente señala que estás aquí para responder preguntas relacionadas con el material del curso. Utiliza los fragmentos de contexto a continuación para formular tu respuesta.
 
         context: {context}
         =========
         question: {question}
         ======
         """
-    QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question"])
+    QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question" ])
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
+
 
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
@@ -97,7 +97,6 @@ def get_conversation_chain(vectorstore):
         combine_docs_chain_kwargs={'prompt': QA_PROMPT}
     )
     return conversation_chain
-
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -113,31 +112,25 @@ def handle_userinput(user_question):
 
 def main():
     load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
-    
-    st.set_page_config(page_title="TutorIA - Chatea con tu Profe", page_icon=":books:", layout="wide")  # Añadido layout="wide" para ocultar la barra lateral
+    st.set_page_config(page_title="TutorIA - Chatea con tu Profe", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
-    if "raw_text" not in st.session_state or "text_chunks" not in st.session_state:
-        # Obtener los archivos PDF y procesarlos
-        file_directory = 'files'
-        filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
-        st.session_state.raw_text = get_pdf_text(filepaths)
+    # Obtener los archivos PDF y procesarlos
+    file_directory = 'files'
+    filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
+    text = get_pdf_text(filepaths)
 
-        # Dividir el texto en fragmentos
-        st.session_state.text_chunks = get_text_chunks(st.session_state.raw_text)
+    # Dividir el texto en fragmentos
+    chunks = get_text_chunks(text)
 
-    if "vectorstore" not in st.session_state:
-        # Crear el vectorstore
-        vectorstore_file = 'vectorstore.pkl'
-        st.session_state.vectorstore = get_vectorstore(st.session_state.text_chunks, vectorstore_file)
+    # Crear el vectorstore
+    vectorstore_file = 'vectorstore.pkl'
+    vectorstore = get_vectorstore(chunks, vectorstore_file)
 
-    if "conversation" not in st.session_state:
-        # Crear la cadena de conversación
-        st.session_state.conversation = get_conversation_chain(st.session_state.vectorstore)
+    # Crear la cadena de conversación
+    conversation = get_conversation_chain(vectorstore)
 
-    if "chat_history" not in st.session_state:
-        st.session_state.chat_history = []
+    chat_history = []
 
     st.header("TutorIA - Chatea con tu Profe :books:")
     st.write("Realizar consultas de cualquier tema en tu material de estudio: Haz preguntas como si estuvieras hablando con tu profesor real. TutorIA busca en tus PDFs y proporciona respuestas claras y concisas.")
@@ -145,7 +138,16 @@ def main():
     user_question = st.text_input("Realiza preguntas sobre la asignatura:")
     if st.button('Enviar'):  
         if user_question:
-            handle_userinput(user_question)
+            response = conversation({'question': user_question})
+            chat_history = response['chat_history']
+
+            for i, message in enumerate(chat_history):
+                if i % 2 == 0:
+                    st.write(user_template.replace(
+                        "{{MSG}}", message.content), unsafe_allow_html=True)
+                else:
+                    st.write(bot_template.replace(
+                        "{{MSG}}", message.content), unsafe_allow_html=True)
 
 if __name__ == '__main__':
     main()
