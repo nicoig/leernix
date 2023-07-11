@@ -5,6 +5,7 @@ streamlit
 openai
 faiss-cpu
 altair
+tiktoken
 
 # uncomment to use huggingface llms
 # huggingface-hub==0.14.1
