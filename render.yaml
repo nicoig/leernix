@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: tutor-ia
+    name: chat-jacobo
     env: python
     build:
       command: |
