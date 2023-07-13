@@ -44,6 +44,7 @@ from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template, user_template
 from langchain.prompts.prompt import PromptTemplate
 
+
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
