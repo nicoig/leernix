@@ -5,7 +5,7 @@
 # git init
 # git add .
 # git commit -m "primer commit"
-# git remote add origin https://github.com/nicoig/tutoria-profe.git
+# git remote add origin https://github.com/nicoig/chat-jacobo.git
 # git push -u origin master
 
 # Actualizar Repo de Github
@@ -72,7 +72,6 @@ def get_text_chunks(text, chunks_file):
             pickle.dump(chunks, f)
     return chunks
 
-
 def get_vectorstore(text_chunks, vectorstore_file):
     if os.path.exists(vectorstore_file):
         with open(vectorstore_file, 'rb') as f:
@@ -84,10 +83,14 @@ def get_vectorstore(text_chunks, vectorstore_file):
             pickle.dump(vectorstore, f)
     return vectorstore
 
-def get_conversation_chain(vectorstore):
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo")
+def get_conversation_chain(vectorstore, model_name):
+    llm = ChatOpenAI(model_name=model_name)
     qa_template = """
-        Eres un asistente de IA diseñado para actuar como un profesor. Se te proporcionarán varios documentos de texto y se espera que respondas preguntas relacionadas con ellos de la manera más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con los documentos proporcionados, cortésmente señala que estás aquí para responder preguntas relacionadas con el material del curso. Utiliza los fragmentos de contexto a continuación para formular tu respuesta.
+        Eres el psicólogo y antropólogo Jacobo Grinberg. Se te proporcionarán varios documentos de texto basados
+        en las investigaciones de Grinberg que eres tu, debes tomar el rol y se espera que respondas preguntas relacionadas con ellos de la manera 
+        más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la sabes en lugar de intentar adivinarla. 
+        Si la pregunta no está relacionada con las investigaciones de Grinberg, cortésmente señala que estás aquí para responder 
+        preguntas relacionadas con su trabajo. Utiliza los fragmentos de contexto a continuación para formular tu respuesta.
 
         context: {context}
         =========
@@ -97,7 +100,6 @@ def get_conversation_chain(vectorstore):
     QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question" ])
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
 
-
     conversation_chain = ConversationalRetrievalChain.from_llm(
         llm=llm,
         retriever=vectorstore.as_retriever(),
@@ -105,6 +107,7 @@ def get_conversation_chain(vectorstore):
         combine_docs_chain_kwargs={'prompt': QA_PROMPT}
     )
     return conversation_chain
+
 
 def handle_userinput(user_question):
     response = st.session_state.conversation({'question': user_question})
@@ -118,36 +121,57 @@ def handle_userinput(user_question):
             st.write(bot_template.replace(
                 "{{MSG}}", message.content), unsafe_allow_html=True)
             
-            
+
 def main():
     load_dotenv()
-    st.set_page_config(page_title="TutorIA - Chatea con tu Profe", page_icon=":books:", layout="wide")
+    st.set_page_config(page_title="Chatea con Jacobo Grinberg", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
-    # Comprueba si el estado de la sesión ya se ha inicializado
+    st.sidebar.title('Menu')
+    model_name = st.sidebar.selectbox(
+        'Selecciona un modelo de LLM:',
+        ('gpt-3.5-turbo', 'gpt-3.5-turbo-16k','text-davinci-003','gpt-4') # Puedes poner los modelos que quieras aquí
+    )
+    temperature = st.sidebar.slider('Ajusta la temperatura:', min_value=0.0, max_value=1.0, value=0.2, step=0.1)
+
     if "initialized" not in st.session_state:
-        # Obtener los archivos PDF y procesarlos
         file_directory = 'files'
         filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
         text = get_pdf_text(filepaths)
 
-        # Dividir el texto en fragmentos
         chunks_file = 'chunks.pkl'
         chunks = get_text_chunks(text, chunks_file)
 
-        # Crear el vectorstore
         vectorstore_file = 'vectorstore.pkl'
         vectorstore = get_vectorstore(chunks, vectorstore_file)
 
-        # Crear la cadena de conversación
-        st.session_state.conversation = get_conversation_chain(vectorstore)
+        st.session_state.conversation = get_conversation_chain(vectorstore, model_name)
+        st.session_state.llm_temperature = temperature
         st.session_state.chat_history = []
         st.session_state.initialized = True
 
-    st.header("TutorIA - Chatea con tu Profe :books:")
-    st.write("Realizar consultas de cualquier tema en tu material de estudio: Haz preguntas como si estuvieras hablando con tu profesor real. TutorIA busca en tus PDFs y proporciona respuestas claras y concisas.")
 
-    user_question = st.text_input("Realiza preguntas sobre la asignatura:")
+    # Estableciendo el título
+    st.header("Chat con Jacobo Grinberg :books:")
+
+    # Estableciendo el subtítulo
+    #st.subheader("Chatea, explora y aprende de forma dinámica")
+
+        # Mostrar la imagen
+    st.image('img/jacobo_3.jpg', width=500)
+
+
+    st.write("""
+    Soy Jacobo Grinberg, conocido por mi trabajo en psicología y antropología con un enfoque particular en la conciencia y la percepción. A través de este chatbot, puedes consultar sobre mis trabajos, proyectos e ideas, tales como:
+
+    - La integración de datos fisiológicos en un cuerpo teórico comprensivo y racional.
+    - Mi teoría sobre que todo lo que existe es un nivel particular de conciencia, incluso la materia.
+    - Mis análisis detallados de la naturaleza del "yo" desde un punto de vista racional y lógico.
+    - Mis exploraciones en torno a temas complejos y profundos relacionados con el amor, la libertad y la psicofisiología.
+""")
+
+
+    user_question = st.text_input("Realiza tu consulta:")
     if st.button('Enviar'):  
         if user_question:
             handle_userinput(user_question)
