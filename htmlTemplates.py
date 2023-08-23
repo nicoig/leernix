@@ -40,17 +40,34 @@ body {
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTu6i8CWYY8EJEeYKu_jZtVlFpFFgLRoO03wA&usqp=CAU" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+        <img src="https://static.vecteezy.com/system/resources/thumbnails/007/225/199/small/robot-chat-bot-concept-illustration-vector.jpg" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>
 '''
 
+
+
 user_template = '''
 <div class="chat-message user">
     <div class="avatar">
-        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png">
+        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
     </div>    
     <div class="message">{{MSG}}</div>
 </div>
 '''
+
+
+
+scroll_js = """
+<script>
+// Get scroll position from session storage and scroll to it
+const scrollY = sessionStorage.getItem('scrollY')
+if (scrollY) window.scrollTo(0, parseInt(scrollY))
+
+// Store scroll position in session storage when user scrolls
+window.addEventListener('scroll', () => {
+  sessionStorage.setItem('scrollY', window.scrollY)
+})
+</script>
+"""

@@ -5,7 +5,7 @@
 # git init
 # git add .
 # git commit -m "primer commit"
-# git remote add origin https://github.com/nicoig/chat-jacobo.git
+# git remote add origin https://github.com/nicoig/legalmind.git
 # git push -u origin master
 
 # Actualizar Repo de Github
@@ -45,6 +45,8 @@ from htmlTemplates import css, bot_template, user_template
 from langchain.prompts.prompt import PromptTemplate
 
 
+import os
+from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
@@ -87,17 +89,20 @@ def get_vectorstore(text_chunks, vectorstore_file):
 def get_conversation_chain(vectorstore, model_name):
     llm = ChatOpenAI(model_name=model_name)
     qa_template = """
-        Eres el psicólogo y antropólogo Jacobo Grinberg. Se te proporcionarán varios documentos de texto basados
-        en las investigaciones de Grinberg que eres tu, debes tomar el rol y se espera que respondas preguntas relacionadas con ellos de la manera 
-        más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la sabes en lugar de intentar adivinarla. 
-        Si la pregunta no está relacionada con las investigaciones de Grinberg, cortésmente señala que estás aquí para responder 
-        preguntas relacionadas con su trabajo. Utiliza los fragmentos de contexto a continuación para formular tu respuesta.
+        Eres un abogado experto en asesoramiento legal llamado LegalMind. Se te proporcionarán varios documentos de texto basados
+        en contextos legales específicos. Debes tomar el rol de un asesor legal y se espera que respondas preguntas relacionadas 
+        con estos contextos de la manera más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la 
+        sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con el contexto legal proporcionado, 
+        cortésmente señala que estás aquí para responder preguntas relacionadas con ese ámbito legal. Utiliza los fragmentos de 
+        contexto a continuación para formular tu respuesta.
 
-        context: {context}
+        Contexto: {context}
         =========
-        question: {question}
+        Pregunta: {question}
         ======
-        """
+    """
+    # Aquí podrías añadir el código para generar la respuesta usando el modelo.
+
     QA_PROMPT = PromptTemplate(template=qa_template, input_variables=["context","question" ])
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
 
@@ -110,22 +115,25 @@ def get_conversation_chain(vectorstore, model_name):
     return conversation_chain
 
 
-def handle_userinput(user_question):
+def handle_userinput(user_question, chat_placeholder):
     response = st.session_state.conversation({'question': user_question})
     st.session_state.chat_history = response['chat_history']
 
+    chat_content = ""
     for i, message in enumerate(st.session_state.chat_history):
         if i % 2 == 0:
-            st.write(user_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+            chat_content += user_template.replace("{{MSG}}", message.content)
         else:
-            st.write(bot_template.replace(
-                "{{MSG}}", message.content), unsafe_allow_html=True)
+            chat_content += bot_template.replace("{{MSG}}", message.content)
+    
+    chat_placeholder.write(chat_content, unsafe_allow_html=True)  # Actualizar el chat en el espacio vacío
+
+
             
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="Chatea con Jacobo Grinberg", page_icon=":books:", layout="wide")
+    st.set_page_config(page_title="LegalMind - Abogado IA", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
     st.sidebar.title('Menu')
@@ -153,29 +161,30 @@ def main():
 
 
     # Estableciendo el título
-    st.header("Chat con Jacobo Grinberg :books:")
+    st.header("🤖⚖️ LegalMind - Abogado IA ⚖️🤖")
 
     # Estableciendo el subtítulo
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/jacobo_3.jpg', width=500)
+    st.image('img/abogado.jpg', width=500)
 
 
     st.write("""
-    Soy Jacobo Grinberg, conocido por mi trabajo en psicología y antropología con un enfoque particular en la conciencia y la percepción. A través de este chatbot, puedes consultar sobre mis trabajos, proyectos e ideas, tales como:
+    Soy LegalMind, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
 
-    - La integración de datos fisiológicos en un cuerpo teórico comprensivo y racional.
-    - Mi teoría sobre que todo lo que existe es un nivel particular de conciencia, incluso la materia.
-    - Mis análisis detallados de la naturaleza del "yo" desde un punto de vista racional y lógico.
-    - Mis exploraciones en torno a temas complejos y profundos relacionados con el amor, la libertad y la psicofisiología.
+    - Interpretación básica de leyes y estatutos.
+    - Información general sobre procesos legales, como juicios y apelaciones.
+    - Consejos preliminares sobre cómo abordar situaciones legales específicas.
+    - Respuestas a preguntas frecuentes en el ámbito del derecho.
 """)
 
+    chat_placeholder = st.empty()  # Crea un espacio vacío para el chat
 
-    user_question = st.text_input("Realiza tu consulta:")
-    if st.button('Enviar'):  
-        if user_question:
-            handle_userinput(user_question)
+    user_question = st.chat_input("Realiza tu consulta:")
+    if user_question:
+        handle_userinput(user_question, chat_placeholder)  # Pasar chat_placeholder como argumento
+
 
 
 if __name__ == '__main__':
