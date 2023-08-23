@@ -16,13 +16,17 @@
 # Para eliminar un repo cargado
 # git remote remove origin
 
-# En Render
-# agregar en variables de entorno
-# PYTHON_VERSION = 3.9.12
-
 # Pasando a master
 # git checkout -b master
-# git push origin master
+# git push origin 
+
+# Verificando donde está montado el proyecto
+# git remote -v
+
+# Cambiar la URL del control remoto "origin":
+# git remote set-url origin https://github.com/nicoig/legalmind.git
+
+
 
 
 
