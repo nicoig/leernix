@@ -34,6 +34,16 @@ body {
   padding: 0 1.5rem;
   color: #fff;
 }
+
+/* Nuevo código para mover la barra de chat hacia arriba en móviles */
+@media (max-width: 768px) {
+    .stTextInput input {
+        margin-top: -200px !important;
+    }
+}
+
+/* Nuevo código para eliminar el logo de Streamlit */
+.reportview-container .main footer {visibility: hidden;}
 </style>
 '''
 
