@@ -5,7 +5,7 @@
 # git init
 # git add .
 # git commit -m "primer commit"
-# git remote add origin https://github.com/nicoig/legalmind.git
+# git remote add origin https://github.com/nicoig/saulgoodman.git
 # git push -u origin master
 
 # Actualizar Repo de Github
@@ -24,7 +24,7 @@
 # git remote -v
 
 # Cambiar la URL del control remoto "origin":
-# git remote set-url origin https://github.com/nicoig/legalmind.git
+# git remote set-url origin https://github.com/nicoig/saulgoodman.git
 
 
 
@@ -93,8 +93,13 @@ def get_vectorstore(text_chunks, vectorstore_file):
 def get_conversation_chain(vectorstore, model_name):
     llm = ChatOpenAI(model_name=model_name)
     qa_template = """
-        Eres un abogado experto en asesoramiento legal llamado LegalMind. Se te proporcionarán varios documentos de texto basados
-        en contextos legales específicos. Debes tomar el rol de un asesor legal y se espera que respondas preguntas relacionadas 
+        Eres un abogado experto en asesoramiento legal llamado Saul Goodman. Eres un personaje de una seria de tv, 
+         se te proporciona tu historia en los documentos, eres Jimmy McGill alias Saul Goodman, también eres un expero en temas legales.
+         Si te preguntan por cosas sobre Jimmy McGill o Sauk Goodman, debes responder en primera persona, como si tu lo fueres, porque en
+         verdad lo eres, debes tomar el rol.
+         Se te proporcionarán varios documentos de texto basados
+        en contextos legales específicos. Siempre debes intentar dar una respuesta en base al conocimiento con el que fuiste entrenado.
+        Debes tomar el rol de un asesor legal y se espera que respondas preguntas relacionadas 
         con estos contextos de la manera más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la 
         sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con el contexto legal proporcionado, 
         cortésmente señala que estás aquí para responder preguntas relacionadas con ese ámbito legal. Utiliza los fragmentos de 
@@ -119,25 +124,47 @@ def get_conversation_chain(vectorstore, model_name):
     return conversation_chain
 
 
-def handle_userinput(user_question, chat_placeholder):
-    response = st.session_state.conversation({'question': user_question})
-    st.session_state.chat_history = response['chat_history']
 
+
+def handle_userinput(user_question, chat_placeholder):
+    # Añadir la pregunta del usuario y un mensaje temporal al historial del chat
+    st.session_state.chat_history.append(user_question)
+    st.session_state.chat_history.append("Generando respuesta...")
+
+    # Mostrar el historial del chat actualizado
     chat_content = ""
     for i, message in enumerate(st.session_state.chat_history):
+        content = message.content if hasattr(message, 'content') else message  # Ajuste aquí
         if i % 2 == 0:
-            chat_content += user_template.replace("{{MSG}}", message.content)
+            chat_content += user_template.replace("{{MSG}}", content)
         else:
-            chat_content += bot_template.replace("{{MSG}}", message.content)
-    
-    chat_placeholder.write(chat_content, unsafe_allow_html=True)  # Actualizar el chat en el espacio vacío
+            chat_content += bot_template.replace("{{MSG}}", content)
+    chat_placeholder.write(chat_content, unsafe_allow_html=True)
+
+    # Obtener la respuesta real del chatbot
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history[-1] = response['chat_history'][-1].content  # Reemplazar el mensaje temporal
+
+    # Mostrar el historial del chat con la respuesta real
+    chat_content = ""
+    for i, message in enumerate(st.session_state.chat_history):
+        content = message.content if hasattr(message, 'content') else message  # Ajuste aquí
+        if i % 2 == 0:
+            chat_content += user_template.replace("{{MSG}}", content)
+        else:
+            chat_content += bot_template.replace("{{MSG}}", content)
+    chat_placeholder.write(chat_content, unsafe_allow_html=True)
+
+
+
+
 
 
             
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="LegalMind - Abogado IA", page_icon=":books:", layout="wide")
+    st.set_page_config(page_title="Saul Goodman - Abogado IA", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
     st.sidebar.title('Menu')
@@ -165,17 +192,18 @@ def main():
 
 
     # Estableciendo el título
-    st.header("🤖⚖️ LegalMind - Abogado IA ⚖️🤖")
+    st.header("🤖⚖️ Saul Goodman - Abogado IA ⚖️🤖")
 
     # Estableciendo el subtítulo
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/abogado.jpg', width=500)
+    st.image('img/logosaul.png', width=500)
+    st.image('img/saul.jpg', width=500)
 
 
     st.write("""
-    Soy LegalMind, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
+    Soy Saul Goodman, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
 
     - Interpretación básica de leyes y estatutos.
     - Información general sobre procesos legales, como juicios y apelaciones.

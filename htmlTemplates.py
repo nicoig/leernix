@@ -50,7 +50,7 @@ body {
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://static.vecteezy.com/system/resources/thumbnails/007/225/199/small/robot-chat-bot-concept-illustration-vector.jpg" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>
