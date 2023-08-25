@@ -5,7 +5,7 @@ body {
     color: #ffffff;  /* Color de texto general para todo el cuerpo de la página */
 }
 .reportview-container {
-    max-width: 80%;
+    max-width: 70%;
     margin: auto;
     background-color: #262626;  /* Cambia el color de fondo del contenedor de la aplicación Streamlit */
     color: #ffffff;  /* Cambia el color de texto del contenedor de la aplicación Streamlit */
@@ -38,7 +38,7 @@ body {
 /* Nuevo código para mover la barra de chat hacia arriba en móviles */
 @media (max-width: 768px) {
     .stTextInput input {
-        margin-top: -200px !important;
+        margin-top: -300px !important;
     }
 }
 
