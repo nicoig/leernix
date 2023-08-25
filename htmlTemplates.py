@@ -6,7 +6,7 @@ body {
 }
 .reportview-container {
     max-width: 70%;
-    margin: 0;
+    margin: auto;
     background-color: #262626;  /* Cambia el color de fondo del contenedor de la aplicación Streamlit */
     color: #ffffff;  /* Cambia el color de texto del contenedor de la aplicación Streamlit */
     padding: 0px;  /* Agrega algo de espacio alrededor del contenedor de la aplicación Streamlit */
