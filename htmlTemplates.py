@@ -5,7 +5,7 @@ body {
     color: #ffffff;  /* Color de texto general para todo el cuerpo de la página */
 }
 .reportview-container {
-    max-width: 60%;
+    max-width: 80%;
     margin: auto;
     background-color: #262626;  /* Cambia el color de fondo del contenedor de la aplicación Streamlit */
     color: #ffffff;  /* Cambia el color de texto del contenedor de la aplicación Streamlit */
@@ -30,9 +30,9 @@ body {
   object-fit: cover;
 }
 .chat-message .message {
-  width: 50%;
-  padding: 0 1.5rem;
-  color: #fff;
+    width: 70%;  /* Ajusta este valor según tus necesidades */
+    word-wrap: break-word;  /* Romper palabras si es necesario para evitar el desbordamiento */
+    overflow-wrap: break-word;  /* Permite que las palabras se rompan para evitar el desbordamiento */
 }
 
 /* Nuevo código para mover la barra de chat hacia arriba en móviles */
