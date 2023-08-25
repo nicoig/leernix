@@ -194,8 +194,8 @@ def main():
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/logosaul2.png', width=500)
-    st.image('img/saul.jpg', width=500)
+    st.image('img/logosaul2.png', width=300)
+    st.image('img/saul.jpg', width=300)
 
 
     st.write("""
