@@ -192,13 +192,13 @@ def main():
 
 
     # Estableciendo el título
-    st.header("🤖⚖️ Saul Goodman - Abogado IA ⚖️🤖")
+    #st.header("🤖⚖️ Saul Goodman - Abogado IA ⚖️🤖")
 
     # Estableciendo el subtítulo
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/logosaul.png', width=500)
+    st.image('img/logosaul2.png', width=500)
     st.image('img/saul.jpg', width=500)
 
 
