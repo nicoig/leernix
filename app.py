@@ -158,10 +158,6 @@ def handle_userinput(user_question, chat_placeholder):
 
 
 
-
-
-            
-
 def main():
     load_dotenv()
     st.set_page_config(page_title="Saul Goodman - Abogado IA", page_icon=":books:", layout="wide")
@@ -204,7 +200,8 @@ def main():
 
     st.write("""
     Soy Saul Goodman, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
-
+    
+    - Sobre mi vida, historia y acontecimientos relevantes.
     - Interpretación básica de leyes y estatutos.
     - Información general sobre procesos legales, como juicios y apelaciones.
     - Consejos preliminares sobre cómo abordar situaciones legales específicas.
