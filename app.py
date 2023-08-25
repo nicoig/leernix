@@ -13,6 +13,10 @@
 # git commit -m "Se actualizan las variables de entorno"
 # git push origin master
 
+git add .
+git commit -m "Se actualizan las variables de entorno"
+git push origin master
+
 # Para eliminar un repo cargado
 # git remote remove origin
 
@@ -194,8 +198,8 @@ def main():
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/logosaul2.png', width=300)
-    st.image('img/saul.jpg', width=300)
+    st.image('img/logosaul2.png', width=350)
+    st.image('img/saul.jpg', width=350)
 
 
     st.write("""
