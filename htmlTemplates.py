@@ -12,8 +12,7 @@ body {
     padding: 10px;  /* Agrega algo de espacio alrededor del contenedor de la aplicación Streamlit */
 }
 .chat-message {
-    display: flex;  /* Define este contenedor como un contenedor flex */
-    align-items: start;  /* Alinea los elementos al inicio del eje transversal */
+    padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
 }
 .chat-message.user {
     background-color: #2b313e
@@ -22,21 +21,18 @@ body {
     background-color: #475063
 }
 .chat-message .avatar {
-  flex: 0 0 auto;  /* No permitas que el avatar crezca o se encoja; será automáticamente el tamaño de su contenido */
+  width: 20%;
 }
-
 .chat-message .avatar img {
   max-width: 78px;
   max-height: 78px;
   border-radius: 50%;
   object-fit: cover;
 }
-
 .chat-message .message {
-  flex: 1 1 auto;  /* Permite que el mensaje crezca y se encoja, y ocupe todo el espacio disponible */
-  margin-left: 1rem;  /* Añade algo de espacio entre el avatar y el mensaje */
-  word-wrap: break-word;  
-  overflow-wrap: break-word;  
+    width: 70%;  /* Ajusta este valor según tus necesidades */
+    word-wrap: break-word;  /* Romper palabras si es necesario para evitar el desbordamiento */
+    overflow-wrap: break-word;  /* Permite que las palabras se rompan para evitar el desbordamiento */
 }
 
 /* Nuevo código para mover la barra de chat hacia arriba en móviles */
@@ -54,7 +50,7 @@ body {
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 50px; max-width: 50px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>
@@ -65,7 +61,7 @@ bot_template = '''
 user_template = '''
 <div class="chat-message user">
     <div class="avatar">
-        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png" style="max-height: 78px; max-width: 78px; border-radius: 50%; object-fit: cover;">
+        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png" style="max-height: 50px; max-width: 50px; border-radius: 50%; object-fit: cover;">
     </div>    
     <div class="message">{{MSG}}</div>
 </div>
