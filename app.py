@@ -9,13 +9,11 @@
 # git push -u origin master
 
 # Actualizar Repo de Github
-# git add .
-# git commit -m "Se actualizan las variables de entorno"
-# git push origin master
-
+'''
 git add .
 git commit -m "Se actualizan las variables de entorno"
 git push origin master
+'''
 
 # Para eliminar un repo cargado
 # git remote remove origin
