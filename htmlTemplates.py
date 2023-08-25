@@ -6,10 +6,10 @@ body {
 }
 .reportview-container {
     max-width: 70%;
-    margin: auto;
+    margin: 0;
     background-color: #262626;  /* Cambia el color de fondo del contenedor de la aplicación Streamlit */
     color: #ffffff;  /* Cambia el color de texto del contenedor de la aplicación Streamlit */
-    padding: 10px;  /* Agrega algo de espacio alrededor del contenedor de la aplicación Streamlit */
+    padding: 0px;  /* Agrega algo de espacio alrededor del contenedor de la aplicación Streamlit */
 }
 .chat-message {
     padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
@@ -50,7 +50,7 @@ body {
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 50px; max-width: 50px; border-radius: 50%; object-fit: cover;">
+        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 45px; max-width: 45px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>
@@ -61,7 +61,7 @@ bot_template = '''
 user_template = '''
 <div class="chat-message user">
     <div class="avatar">
-        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png" style="max-height: 50px; max-width: 50px; border-radius: 50%; object-fit: cover;">
+        <img src="https://cdn-icons-png.flaticon.com/512/186/186313.png" style="max-height: 45px; max-width: 45px; border-radius: 50%; object-fit: cover;">
     </div>    
     <div class="message">{{MSG}}</div>
 </div>

@@ -197,9 +197,8 @@ def main():
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/logosaul2.png', width=350)
-    st.image('img/saul.jpg', width=350)
-
+    st.image('img/logosaul2.png', width=300)
+    st.image('img/saul.jpg', width=310)
 
     st.write("""
     Soy Saul Goodman, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
