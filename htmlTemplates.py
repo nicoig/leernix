@@ -12,7 +12,8 @@ body {
     padding: 10px;  /* Agrega algo de espacio alrededor del contenedor de la aplicación Streamlit */
 }
 .chat-message {
-    padding: 1.5rem; border-radius: 0.5rem; margin-bottom: 1rem; display: flex
+    display: flex;  /* Define este contenedor como un contenedor flex */
+    align-items: start;  /* Alinea los elementos al inicio del eje transversal */
 }
 .chat-message.user {
     background-color: #2b313e
@@ -21,18 +22,21 @@ body {
     background-color: #475063
 }
 .chat-message .avatar {
-  width: 20%;
+  flex: 0 0 auto;  /* No permitas que el avatar crezca o se encoja; será automáticamente el tamaño de su contenido */
 }
+
 .chat-message .avatar img {
   max-width: 78px;
   max-height: 78px;
   border-radius: 50%;
   object-fit: cover;
 }
+
 .chat-message .message {
-    width: 70%;  /* Ajusta este valor según tus necesidades */
-    word-wrap: break-word;  /* Romper palabras si es necesario para evitar el desbordamiento */
-    overflow-wrap: break-word;  /* Permite que las palabras se rompan para evitar el desbordamiento */
+  flex: 1 1 auto;  /* Permite que el mensaje crezca y se encoja, y ocupe todo el espacio disponible */
+  margin-left: 1rem;  /* Añade algo de espacio entre el avatar y el mensaje */
+  word-wrap: break-word;  
+  overflow-wrap: break-word;  
 }
 
 /* Nuevo código para mover la barra de chat hacia arriba en móviles */
