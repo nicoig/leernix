@@ -50,7 +50,7 @@ body {
 bot_template = '''
 <div class="chat-message bot">
     <div class="avatar">
-        <img src="https://i.ibb.co/8gCCYJt/saul.jpg" style="max-height: 45px; max-width: 45px; border-radius: 50%; object-fit: cover;">
+        <img src="https://i.ibb.co/CbbHqsm/Logo-Leernix.png" style="max-height: 45px; max-width: 45px; border-radius: 50%; object-fit: cover;">
     </div>
     <div class="message">{{MSG}}</div>
 </div>

@@ -5,7 +5,7 @@
 # git init
 # git add .
 # git commit -m "primer commit"
-# git remote add origin https://github.com/nicoig/saulgoodman.git
+# git remote add origin https://github.com/nicoig/leernix.git
 # git push -u origin master
 
 # Actualizar Repo de Github
@@ -30,11 +30,7 @@ git push origin master
 # git remote set-url origin https://github.com/nicoig/saulgoodman.git
 
 
-
-
-
 ###############################################################
-
 
 
 import os
@@ -57,6 +53,7 @@ from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 
+@st.cache_data
 def get_pdf_text(filepaths):
     text = ""
     for filepath in filepaths:
@@ -66,6 +63,8 @@ def get_pdf_text(filepaths):
                 text += page.extract_text()
     return text
 
+
+@st.cache_data
 def get_text_chunks(text, chunks_file):
     if os.path.exists(chunks_file):
         with open(chunks_file, 'rb') as f:
@@ -82,6 +81,8 @@ def get_text_chunks(text, chunks_file):
             pickle.dump(chunks, f)
     return chunks
 
+
+@st.cache_data
 def get_vectorstore(text_chunks, vectorstore_file):
     if os.path.exists(vectorstore_file):
         with open(vectorstore_file, 'rb') as f:
@@ -96,16 +97,17 @@ def get_vectorstore(text_chunks, vectorstore_file):
 def get_conversation_chain(vectorstore, model_name):
     llm = ChatOpenAI(model_name=model_name)
     qa_template = """
-        Eres un abogado experto en asesoramiento legal llamado Saul Goodman. Eres un personaje de una seria de tv, 
-         se te proporciona tu historia en los documentos, eres Jimmy McGill alias Saul Goodman, también eres un expero en temas legales.
-         Si te preguntan por cosas sobre Jimmy McGill o Sauk Goodman, debes responder en primera persona, como si tu lo fueres, porque en
-         verdad lo eres, debes tomar el rol.
-         Se te proporcionarán varios documentos de texto basados
-        en contextos legales específicos. Siempre debes intentar dar una respuesta en base al conocimiento con el que fuiste entrenado.
-        Debes tomar el rol de un asesor legal y se espera que respondas preguntas relacionadas 
+        Eres un profesor virtual especializado en Administración, es un ramo de carrera Administración de Negocios o Ingeniería Comercial. 
+        Se te proporcionará tu historia en los documentos, y debes tomar el rol de profesor para ayudar 
+        a los estudiantes con sus dudas. Si te preguntan por cosas específicas, debes responder en primera persona, 
+        como si tú fueras el profesor, porque en verdad lo eres.
+        
+        Se te proporcionarán varios documentos de texto basados
+        en contextos académicos específicos. Siempre debes intentar dar una respuesta en base al conocimiento con el que fuiste entrenado.
+        Debes tomar el rol de un profesor y se espera que respondas preguntas relacionadas 
         con estos contextos de la manera más clara y concisa posible. Si no tienes la respuesta, simplemente di que no la 
-        sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con el contexto legal proporcionado, 
-        cortésmente señala que estás aquí para responder preguntas relacionadas con ese ámbito legal. Utiliza los fragmentos de 
+        sabes en lugar de intentar adivinarla. Si la pregunta no está relacionada con el contexto académico proporcionado, 
+        cortésmente señala que estás aquí para responder preguntas relacionadas con ese ámbito académico. Utiliza los fragmentos de 
         contexto a continuación para formular tu respuesta.
 
         Contexto: {context}
@@ -129,26 +131,25 @@ def get_conversation_chain(vectorstore, model_name):
 
 
 
-def handle_userinput(user_question, chat_placeholder):
-    # Añadir la pregunta del usuario y un mensaje temporal al historial del chat
+def handle_userinput(user_question, chat_placeholder, loading_placeholder):
+    # Añadir la pregunta del usuario al historial del chat
     st.session_state.chat_history.append(user_question)
-    st.session_state.chat_history.append("Generando respuesta...")
-
+    
     # Mostrar el historial del chat actualizado
-    chat_content = ""
-    for i, message in enumerate(st.session_state.chat_history):
-        content = message.content if hasattr(message, 'content') else message  # Ajuste aquí
-        if i % 2 == 0:
-            chat_content += user_template.replace("{{MSG}}", content)
-        else:
-            chat_content += bot_template.replace("{{MSG}}", content)
-    chat_placeholder.write(chat_content, unsafe_allow_html=True)
-
+    update_chat(chat_placeholder)
+    
+    # Mostrar el mensaje de "Generando respuesta..." en su propio placeholder
+    loading_placeholder.text("Generando respuesta...")
+    
     # Obtener la respuesta real del chatbot
     response = st.session_state.conversation({'question': user_question})
-    st.session_state.chat_history[-1] = response['chat_history'][-1].content  # Reemplazar el mensaje temporal
+    st.session_state.chat_history.append(response['chat_history'][-1].content)  # Añadir la respuesta real al historial del chat
+    
+    # Actualizar el chat con la respuesta real y limpiar el placeholder de "Cargando"
+    update_chat(chat_placeholder)
+    loading_placeholder.empty()  # Limpiar el placeholder de "Cargando" después de que la respuesta real ha sido añadida
 
-    # Mostrar el historial del chat con la respuesta real
+def update_chat(chat_placeholder):
     chat_content = ""
     for i, message in enumerate(st.session_state.chat_history):
         content = message.content if hasattr(message, 'content') else message  # Ajuste aquí
@@ -163,7 +164,7 @@ def handle_userinput(user_question, chat_placeholder):
 
 def main():
     load_dotenv()
-    st.set_page_config(page_title="Saul Goodman - Abogado IA", page_icon=":books:", layout="wide")
+    st.set_page_config(page_title="Leernix - Profesor IA", page_icon=":books:", layout="wide")
     st.write(css, unsafe_allow_html=True)
 
     st.sidebar.title('Menu')
@@ -176,11 +177,10 @@ def main():
     if "initialized" not in st.session_state:
         file_directory = 'files'
         filepaths = [os.path.join(file_directory, file) for file in os.listdir(file_directory) if file.endswith('.pdf')]
+        
         text = get_pdf_text(filepaths)
-
         chunks_file = 'chunks.pkl'
         chunks = get_text_chunks(text, chunks_file)
-
         vectorstore_file = 'vectorstore.pkl'
         vectorstore = get_vectorstore(chunks, vectorstore_file)
 
@@ -197,24 +197,26 @@ def main():
     #st.subheader("Chatea, explora y aprende de forma dinámica")
 
         # Mostrar la imagen
-    st.image('img/logosaul2.png', width=300)
-    st.image('img/saul.jpg', width=310)
+    st.image('img/Leernix White.png', width=300)
+    st.image('img/profesor_ia.jpg', width=310)
 
     st.write("""
-    Soy Saul Goodman, tu Asistente Legal Inteligente. Estoy programado para ofrecer información y asistencia en una variedad de contextos legales, tales como:
+    Soy Leernix, tu Asistente Académico Virtual. Estoy programado para ofrecer información y asistencia en una variedad de contextos académicos, tales como:
     
-    - Sobre mi vida, historia y acontecimientos relevantes.
-    - Interpretación básica de leyes y estatutos.
-    - Información general sobre procesos legales, como juicios y apelaciones.
-    - Consejos preliminares sobre cómo abordar situaciones legales específicas.
-    - Respuestas a preguntas frecuentes en el ámbito del derecho.
-""")
+    - Información sobre el ramo Administración.
+    - Explicaciones claras y concisas de conceptos y teorías.
+    - Ayuda para entender y resolver ejercicios y problemas.
+    - Estrategias de estudio y consejos para aprender de manera efectiva.
+    
+    ¿En qué puedo ayudarte hoy? Y recuerda, al final de cada interacción, estaré aquí para preguntarte si todo quedó claro o si hay algo más en lo que pueda ayudarte.
+    """)
 
-    chat_placeholder = st.empty()  # Crea un espacio vacío para el chat
-
+    chat_placeholder = st.empty()  # Placeholder para el historial del chat
+    loading_placeholder = st.empty() 
+    
     user_question = st.chat_input("Realiza tu consulta:")
     if user_question:
-        handle_userinput(user_question, chat_placeholder)  # Pasar chat_placeholder como argumento
+        handle_userinput(user_question, chat_placeholder, loading_placeholder)  # Pasar ambos placeholders como argumentos
 
 
 
